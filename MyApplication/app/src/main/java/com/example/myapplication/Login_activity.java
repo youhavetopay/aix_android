@@ -38,38 +38,30 @@ public class Login_activity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.hide();
 
-        login_id = findViewById(R.id.login_id);
-        login_pw = findViewById(R.id.login_pw);
-        btn1 = findViewById(R.id.login_btn1);
-        test_name = findViewById(R.id.test_name);
+        login_id =(EditText) findViewById(R.id.login_id);
+        login_pw =(EditText) findViewById(R.id.login_pw);
+        btn1 =(Button) findViewById(R.id.login_btn1);
+        test_name =(TextView) findViewById(R.id.test_name);
 
-
-        user_id = login_id.getText().toString();
-        user_pw = login_pw.getText().toString();
 
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 try {
-                    PHPRequset requset = new PHPRequset("http://zkwpdlxm.dothome.co.kr/test_login.php");
-                    String result = requset.PhPtest(user_id,user_pw);
+                    user_id = login_id.getText().toString();
+                    user_pw = login_pw.getText().toString();
+                    System.out.println("보내기2 "+user_id+", "+user_pw);
+                    PHPRequset requset = new PHPRequset(user_id,user_pw);
+                    requset.execute("http://zkwpdlxm.dothome.co.kr/test_login.php");
 
-                    if(result.equals("1")){
-                        Toast.makeText(getApplication(), "보냄",Toast.LENGTH_SHORT).show();
-
-                        login_id.setText("");
-                        login_pw.setText("");
-
-                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                        startActivity(intent);
-                    }
-                    else {
-                        Toast.makeText(getApplication(),"못보냄",Toast.LENGTH_SHORT).show();
-                    }
                 }
-                catch (MalformedURLException e){
+                catch (Exception e){
+                    System.out.println("Error   "+e);
                     e.printStackTrace();
                 }
+
+                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                startActivity(intent);
 
             }
         });
