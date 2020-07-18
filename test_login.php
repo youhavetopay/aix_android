@@ -9,8 +9,7 @@ if(mysqli_connect_errno($conn)){
 $user_id = $_POST["name"];
 $user_pw = $_POST["pw"];
 
-echo $user_id;
-echo $user_pw;
+
 
 mysqli_set_charset($conn,"utf8");
 
@@ -23,7 +22,7 @@ while($row = mysqli_fetch_array($res)){
 }
 
 if(count($user_result) == 0){
-    echo "-1\n";
+    echo "-1";
 }
 else{
     echo json_encode(array("user_result"=> $user_result));

@@ -22,7 +22,9 @@ import okhttp3.Response;
 
 public class PHPRequset extends AsyncTask<String , Void, String>{
 
-    String id, pw;
+    private String id, pw;
+
+
 
     public PHPRequset(String id, String pw){
         this.id = id;
@@ -97,7 +99,7 @@ public class PHPRequset extends AsyncTask<String , Void, String>{
 
 
             System.out.println("성공!!!");
-            System.out.println("dmdk   "+sb.toString());
+            System.out.println(sb.toString());
 
             return sb.toString();
 
@@ -106,14 +108,16 @@ public class PHPRequset extends AsyncTask<String , Void, String>{
 
             Log.d("aaaaa", "InsertData: Error ", e);
 
-            return new String("Error: " + e.getMessage());
+            return new String("ProtocolException");
         }
 
     }
 
+
     @Override
     protected void onPostExecute(String s) {
         super.onPostExecute(s);
+
 
     }
 }

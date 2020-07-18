@@ -30,6 +30,10 @@ public class Login_activity extends AppCompatActivity {
 
     String user_id, user_pw;
 
+    PHPRequset requset;
+
+    String php_result;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,8 +55,8 @@ public class Login_activity extends AppCompatActivity {
                     user_id = login_id.getText().toString();
                     user_pw = login_pw.getText().toString();
                     System.out.println("보내기2 "+user_id+", "+user_pw);
-                    PHPRequset requset = new PHPRequset(user_id,user_pw);
-                    requset.execute("http://zkwpdlxm.dothome.co.kr/test_login.php");
+                    requset = new PHPRequset(user_id,user_pw);
+                    php_result = requset.execute("http://zkwpdlxm.dothome.co.kr/test_login.php").get();
 
                 }
                 catch (Exception e){
@@ -60,8 +64,18 @@ public class Login_activity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                startActivity(intent);
+                if(php_result.equals("-1")){
+                    Toast.makeText(getApplication(), "아이디 혹은 비밀번호 틀림",Toast.LENGTH_SHORT).show();
+
+                }
+                else if(php_result.equals("ProtocolException")){
+                    Toast.makeText(getApplication(), "프로토콜 오류",Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    Toast.makeText(getApplication(), "로그인 성공",Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+                }
 
             }
         });
