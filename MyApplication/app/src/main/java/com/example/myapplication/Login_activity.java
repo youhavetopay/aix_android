@@ -21,12 +21,15 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 
 public class Login_activity extends AppCompatActivity {
 
     TextView test_name;
     EditText login_id, login_pw;
     Button btn1;
+
+    ArrayList<String> data = new ArrayList<String>();
 
     String user_id, user_pw;
 
@@ -57,6 +60,7 @@ public class Login_activity extends AppCompatActivity {
                     System.out.println("보내기2 "+user_id+", "+user_pw);
                     requset = new PHPRequset(user_id,user_pw);
                     php_result = requset.execute("http://zkwpdlxm.dothome.co.kr/test_login.php").get();
+                    data = requset.get_pashing_phprequest();
 
                 }
                 catch (Exception e){
@@ -72,8 +76,12 @@ public class Login_activity extends AppCompatActivity {
                     Toast.makeText(getApplication(), "프로토콜 오류",Toast.LENGTH_SHORT).show();
                 }
                 else{
+
                     Toast.makeText(getApplication(), "로그인 성공",Toast.LENGTH_SHORT).show();
+                    login_id.setText("");
+                    login_pw.setText("");
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    intent.putExtra("student_info",data);
                     startActivity(intent);
                 }
 
