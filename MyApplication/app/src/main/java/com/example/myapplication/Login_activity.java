@@ -54,35 +54,39 @@ public class Login_activity extends AppCompatActivity {
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
-                    user_id = login_id.getText().toString();
-                    user_pw = login_pw.getText().toString();
-                    System.out.println("보내기2 "+user_id+", "+user_pw);
-                    requset = new PHPRequset(user_id,user_pw);
-                    php_result = requset.execute("http://zkwpdlxm.dothome.co.kr/test_login.php").get();
-                    data = requset.get_pashing_phprequest();
-
-                }
-                catch (Exception e){
-                    System.out.println("Error   "+e);
-                    e.printStackTrace();
-                }
-
-                if(php_result.equals("-1")){
-                    Toast.makeText(getApplication(), "아이디 혹은 비밀번호 틀림",Toast.LENGTH_SHORT).show();
-
-                }
-                else if(php_result.equals("ProtocolException")){
-                    Toast.makeText(getApplication(), "프로토콜 오류",Toast.LENGTH_SHORT).show();
+                user_id = login_id.getText().toString();
+                user_pw = login_pw.getText().toString();
+                if(user_id.equals("") || user_pw.equals("")){
+                    Toast.makeText(getApplicationContext(), "아이디 혹은 비밀번호를 입력하세요",Toast.LENGTH_SHORT).show();
                 }
                 else{
+                    try {
+                        System.out.println("보내기2 "+user_id+", "+user_pw);
+                        requset = new PHPRequset(user_id,user_pw);
+                        php_result = requset.execute("http://zkwpdlxm.dothome.co.kr/test_login.php").get();
+                        data = requset.get_pashing_phprequest();
 
-                    Toast.makeText(getApplication(), "로그인 성공",Toast.LENGTH_SHORT).show();
-                    login_id.setText("");
-                    login_pw.setText("");
-                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-                    intent.putExtra("student_info",data);
-                    startActivity(intent);
+                    }
+                    catch (Exception e){
+                        System.out.println("Error   "+e);
+                        e.printStackTrace();
+                    }
+
+                    if(php_result.equals("ProtocolException")){
+                        Toast.makeText(getApplication(), "프로토콜 오류",Toast.LENGTH_SHORT).show();
+                    }
+                    else if(data.get(0).equals("false")){
+                        Toast.makeText(getApplicationContext(),"아이디 혹은 비밀번호가 틀렸습니다.",Toast.LENGTH_SHORT).show();
+                    }
+                    else if(data.get(0).equals("true")){
+                        Toast.makeText(getApplicationContext(),"로그인 성공",Toast.LENGTH_SHORT).show();
+
+                        Intent intent = new Intent(getApplicationContext(),MainActivity.class);
+                        intent.putExtra("student_info",data);
+
+                        startActivity(intent);
+                    }
+
                 }
 
             }

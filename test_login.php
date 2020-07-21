@@ -5,7 +5,7 @@
     $USWER_CODE = $_POST["name"];
     $USER_PW = $_POST["pw"];
     
-    $statement = mysqli_prepare($conn, "SELECT * FROM USERS WHERE USWER_CODE = ? AND USER_PW = ?");
+    $statement = mysqli_prepare($conn, "SELECT * FROM USERS2 WHERE USER_ID = ? AND USER_PW = ?");
     mysqli_stmt_bind_param($statement, "ss", $USWER_CODE, $USER_PW);
     mysqli_stmt_execute($statement);
 

@@ -25,7 +25,7 @@ import okhttp3.Response;
 
 public class PHPRequset extends AsyncTask<String , Void, String>{
 
-    private static final String TAG_RESPONSE ="response";
+    private static final String TAG_SUCCESS ="success";
     private static final String TAG_USWER_CODE = "USWER_CODE";
     private static final String TAG_USER_NAME = "USER_NAME";
 
@@ -54,6 +54,7 @@ public class PHPRequset extends AsyncTask<String , Void, String>{
 
         try {
             jsonObject =new JSONObject(get_sb);
+            pashing_result.add(jsonObject.getString(TAG_SUCCESS));
             pashing_result.add(jsonObject.getString(TAG_USWER_CODE));
             pashing_result.add(jsonObject.getString(TAG_USER_NAME));
 
@@ -102,8 +103,6 @@ public class PHPRequset extends AsyncTask<String , Void, String>{
 
 
 
-            httpURLConnection.setReadTimeout(10000);
-            httpURLConnection.setConnectTimeout(10000);
             httpURLConnection.setRequestMethod("POST");
             httpURLConnection.connect();
 
@@ -125,33 +124,34 @@ public class PHPRequset extends AsyncTask<String , Void, String>{
                 inputStream = httpURLConnection.getErrorStream();
             }
 
-            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+            OkHttpClient okHttpClient;
+            okHttpClient = new OkHttpClient.Builder()
                     .addNetworkInterceptor(new Interceptor() {
-                        @NotNull
                         @Override
-                        public Response intercept(@NotNull Chain chain) throws IOException {
-                            Request request = chain.request().newBuilder().addHeader("Connection","Close").build();
+                        public Response intercept(Chain chain) throws IOException {
+                            Request request = chain.request().newBuilder().addHeader("Connection", "close").build();
                             return chain.proceed(request);
                         }
-                    }).build();
+                    })
+                    .build();
 
 
             // 이부분에서 자꾸 오류남 : 예기치 않은 입력스트림의 끝?
-            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "UTF-8");
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
 
             StringBuilder sb = new StringBuilder();
             String line = null;
 
             while((line = bufferedReader.readLine()) != null){
-                sb.append(line);
+                sb.append(line+"\n");
             }
 
 
             bufferedReader.close();
 
 
-
+            inputStream.close();
 
 
 
