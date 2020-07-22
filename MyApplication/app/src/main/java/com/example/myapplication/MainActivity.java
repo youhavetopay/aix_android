@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
+import com.gun0912.tedpermission.TedPermission;
+import com.squareup.picasso.Picasso;
 
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -22,6 +24,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -45,7 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         student_info = (ArrayList<String>)intent.getSerializableExtra("student_info");
-
 
         php_request_score = new PHP_request_score(student_info.get(1),"12345");
         try {

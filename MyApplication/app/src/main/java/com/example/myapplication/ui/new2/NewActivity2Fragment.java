@@ -1,16 +1,11 @@
 package com.example.myapplication.ui.new2;
 
 import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 
-import android.app.Instrumentation;
-import android.content.ContentResolver;
+import android.Manifest;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -18,7 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import android.os.Environment;
+import android.os.Message;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,28 +21,39 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.myapplication.FileUpload;
+import com.example.myapplication.ImageUpload;
 import com.example.myapplication.R;
-
-import org.w3c.dom.Text;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.security.Permission;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.List;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 import static android.app.Activity.RESULT_OK;
 
 public class NewActivity2Fragment extends Fragment {
 
+    private static final int MESSAGE_PERMISSION_GRANTED = 101;
+    private static final int MESSAGE_PERMISSION_DENIED = 102;
+
     private New_activity2_View_Model mViewModel;
     private ImageView upload_img;
     private Button push_img_btn,send_img_btn;
     private File temp_select_file;
+    private Uri selectedImageUri;
+    private View root;
+
+    private String imagePath;
+
+
+
+
 
     public static NewActivity2Fragment newInstance() {
         return new NewActivity2Fragment();
@@ -58,7 +64,7 @@ public class NewActivity2Fragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         mViewModel = new ViewModelProvider(this).get(New_activity2_View_Model.class);
-        View root = inflater.inflate(R.layout.fragment_new_activity2, container, false);
+        root = inflater.inflate(R.layout.fragment_new_activity2, container, false);
         final TextView text_new2 = root.findViewById(R.id.text_new2);
         push_img_btn = root.findViewById(R.id.push_img);
         send_img_btn = root.findViewById(R.id.send_img);
@@ -68,7 +74,7 @@ public class NewActivity2Fragment extends Fragment {
         send_img_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FileUpload.send2Server(temp_select_file);
+                new ImageUpload().execute("http://zkwpdlxm.dothome.co.kr/image_upload2.php",imagePath);
             }
         });
 
@@ -86,38 +92,49 @@ public class NewActivity2Fragment extends Fragment {
                 text_new2.setText("This is IZ*ONE fragment");
             }
         });
+
+
         return root;
     }
+
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if(requestCode == 200 && resultCode == RESULT_OK && data != null && data.getData() != null){
-            Uri selectedImageUri = data.getData();
-            upload_img.setImageURI(selectedImageUri);
+           selectedImageUri = data.getData();
+           upload_img.setImageURI(selectedImageUri);
+           System.out.println("img uri  "+ data.getData());
+
+           /**
+            String[] filePathColumn = {MediaStore.Images.Media.DATA};
+
+            Cursor cursor = getActivity().getContentResolver().query(selectedImageUri, filePathColumn, null,null,null);
+
+            if(cursor != null){
+                System.out.println("cursor not null ");
+                cursor.moveToFirst();
+
+                int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
+                imagePath = cursor.getString(columnIndex);
+
+                System.out.println("이미지 경로  "+imagePath);
+                cursor.moveToFirst();
+
+                Picasso.with(getActivity()).load(new File(imagePath)).into(upload_img);
+                cursor.close();
+
+                send_img_btn.setEnabled(true);
+
+            }
+            **/
+
         }
-        Uri dataUri = data.getData();
-        try {
-            InputStream inputStream = getActivity().getContentResolver().openInputStream(dataUri);
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            upload_img.setImageBitmap(bitmap);
-            inputStream.close();
-
-            String img_date = new SimpleDateFormat("yyyy_MM_dd_hh_mm_ss").format(new Date());
-            temp_select_file = new File(Environment.getExternalStorageDirectory()+"Pictures/Test/", "temp_"+img_date+".jpg");
-
-            System.out.println("awawd     "+temp_select_file);
-
-
-            OutputStream outputStream = new FileOutputStream(temp_select_file);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
-
-        }
-        catch (Exception e){
-            e.printStackTrace();
+        else{
+            Toast.makeText(getContext(), "이미지 가져오기 실패",Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        System.out.println("임시저장 성공");
-        send_img_btn.setEnabled(true);
+
 
 
     }
@@ -132,8 +149,26 @@ public class NewActivity2Fragment extends Fragment {
 
     }
 
-    private void tedPermission(){
-        PermissionListener
+    private void ShowPermissionDialog(){
+
+        PermissionListener permissionListener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                Toast.makeText(getActivity(), "권한 허가", Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(getActivity(), "권한 거부", Toast.LENGTH_SHORT).show();
+            }
+        };
+
+
     }
+
+
+
+
 
 }
