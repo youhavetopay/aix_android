@@ -1,10 +1,13 @@
 package com.example.myapplication.ui.new2;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.view.LayoutInflater;
@@ -31,8 +35,9 @@ import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.security.Permission;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 import static android.app.Activity.RESULT_OK;
@@ -44,15 +49,13 @@ public class NewActivity2Fragment extends Fragment {
 
     private New_activity2_View_Model mViewModel;
     private ImageView upload_img;
-    private Button push_img_btn,send_img_btn;
+    private Button push_img_btn, send_img_btn;
+
     private File temp_select_file;
     private Uri selectedImageUri;
     private View root;
 
     private String imagePath;
-
-
-
 
 
     public static NewActivity2Fragment newInstance() {
@@ -61,7 +64,7 @@ public class NewActivity2Fragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+    public View onCreateView(@NonNull final LayoutInflater inflater, @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
         mViewModel = new ViewModelProvider(this).get(New_activity2_View_Model.class);
         root = inflater.inflate(R.layout.fragment_new_activity2, container, false);
@@ -74,7 +77,17 @@ public class NewActivity2Fragment extends Fragment {
         send_img_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new ImageUpload().execute("http://zkwpdlxm.dothome.co.kr/image_upload2.php",imagePath);
+
+                int permissionCheak = ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+                if (permissionCheak == PackageManager.PERMISSION_DENIED) {
+                    ActivityCompat.requestPermissions(getActivity(),
+                            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                            MESSAGE_PERMISSION_GRANTED);
+                } else {
+                    new ImageUpload().execute("http://zkwpdlxm.dothome.co.kr/image_upload2.php", imagePath);
+
+                }
             }
         });
 
@@ -82,8 +95,9 @@ public class NewActivity2Fragment extends Fragment {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(Intent.ACTION_PICK);
-                intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*");
-                startActivityForResult(intent,200);
+                intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                startActivityForResult(intent, 200);
+
             }
         });
         mViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -97,44 +111,63 @@ public class NewActivity2Fragment extends Fragment {
         return root;
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        switch (requestCode) {
+            case MESSAGE_PERMISSION_GRANTED:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    new ImageUpload().execute("http://zkwpdlxm.dothome.co.kr/image_upload2.php", imagePath);
+                }
+        }
+    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if(requestCode == 200 && resultCode == RESULT_OK && data != null && data.getData() != null){
-           selectedImageUri = data.getData();
-           upload_img.setImageURI(selectedImageUri);
-           System.out.println("img uri  "+ data.getData());
+        if (requestCode == 200 && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            selectedImageUri = data.getData();
+            System.out.println("img uri  " + data.getData());
 
-           /**
             String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
-            Cursor cursor = getActivity().getContentResolver().query(selectedImageUri, filePathColumn, null,null,null);
+            Cursor cursor = getActivity().getContentResolver().query(selectedImageUri, filePathColumn, null, null, null);
 
-            if(cursor != null){
+            if (cursor != null) {
                 System.out.println("cursor not null ");
                 cursor.moveToFirst();
 
                 int columnIndex = cursor.getColumnIndex(filePathColumn[0]);
                 imagePath = cursor.getString(columnIndex);
 
-                System.out.println("이미지 경로  "+imagePath);
+                System.out.println("이미지 경로  " + imagePath);
                 cursor.moveToFirst();
 
+                String now_time = new SimpleDateFormat("yyyyMMddHMsS").format(new Date());
+
+                temp_select_file = new File(imagePath);
+                if(temp_select_file.renameTo(new File(imagePath, now_time))){
+                    System.out.println("변경 성공");
+                }
+                else {
+                    System.out.println("변경 실패");
+                }
+
                 Picasso.with(getActivity()).load(new File(imagePath)).into(upload_img);
+                upload_img.setImageURI(selectedImageUri);
                 cursor.close();
+
+
 
                 send_img_btn.setEnabled(true);
 
-            }
-            **/
 
-        }
-        else{
-            Toast.makeText(getContext(), "이미지 가져오기 실패",Toast.LENGTH_SHORT).show();
+
+            }
+
+        } else {
+            Toast.makeText(getContext(), "이미지 가져오기 실패", Toast.LENGTH_SHORT).show();
             return;
         }
-
-
 
 
     }
@@ -148,27 +181,6 @@ public class NewActivity2Fragment extends Fragment {
 
 
     }
-
-    private void ShowPermissionDialog(){
-
-        PermissionListener permissionListener = new PermissionListener() {
-            @Override
-            public void onPermissionGranted() {
-                Toast.makeText(getActivity(), "권한 허가", Toast.LENGTH_SHORT).show();
-
-            }
-
-            @Override
-            public void onPermissionDenied(List<String> deniedPermissions) {
-                Toast.makeText(getActivity(), "권한 거부", Toast.LENGTH_SHORT).show();
-            }
-        };
-
-
-    }
-
-
-
 
 
 }

@@ -1,9 +1,14 @@
 package com.example.myapplication.ui.gallery;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -18,18 +23,40 @@ public class GalleryFragment extends Fragment {
 
     private GalleryViewModel galleryViewModel;
 
+    private WebView mWebView; // 웹뷰 선언
+    private WebSettings mWebSettings; //웹뷰세팅
+
+    String source = "";
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
         galleryViewModel =
                 ViewModelProviders.of(this).get(GalleryViewModel.class);
         View root = inflater.inflate(R.layout.fragment_gallery, container, false);
-        final TextView textView = root.findViewById(R.id.text_gallery);
-        galleryViewModel.getText().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(@Nullable String s) {
-                textView.setText(s);
-            }
-        });
+
+        mWebView = root.findViewById(R.id.web_view);
+        mWebView.setWebViewClient(new WebViewClient());
+        mWebView.getSettings().setJavaScriptEnabled(true);
+        mWebView.addJavascriptInterface(new MyJavascriptInterface(), "Android");
+        mWebSettings = mWebView.getSettings();
+
+        mWebView.loadUrl("http://zkwpdlxm.dothome.co.kr/Notice.html");
+
+
         return root;
+    }
+
+    public class MyJavascriptInterface {
+        @JavascriptInterface
+        public void getHtml(String html) {
+            //위 자바스크립트가 호출되면 여기로 html이 반환됨
+            source = html;
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        setRetainInstance(true);
     }
 }

@@ -1,10 +1,18 @@
 <?php
-    $file_path = "";
-    $file_path = $file_path . basename( $_FILES['uploaded_file']['name']);
-    if(move_uploaded_file($_FILES['uploaded_file']['tmp_name'], $file_path)) {
-        // 동일한 파일명이면 덮어쓰기를 한다.
+
+    //$uploads_dir . basename( $_FILES['uploaded_file']['name']);
+    $uploads_dir = "img_upload/";
+    $img_name =  $_FILES['uploaded_file']['name'];
+    $now_date = date("YmdHms");
+    
+    $file_path = $uploads_dir . $_FILES['uploaded_file']['name'];
+    if(move_uploaded_file($img_name, $file_path)) {
+        
         $result = array("result" => "success");
-    } else{
+        
+        
+    } 
+    else{
         $result = array("result" => "error");
     }
     echo json_encode($result);
