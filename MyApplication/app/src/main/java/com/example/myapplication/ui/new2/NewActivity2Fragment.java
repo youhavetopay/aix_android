@@ -142,25 +142,11 @@ public class NewActivity2Fragment extends Fragment {
                 System.out.println("이미지 경로  " + imagePath);
                 cursor.moveToFirst();
 
-                String now_time = new SimpleDateFormat("yyyyMMddHMsS").format(new Date());
-
-                temp_select_file = new File(imagePath);
-                if(temp_select_file.renameTo(new File(imagePath, now_time))){
-                    System.out.println("변경 성공");
-                }
-                else {
-                    System.out.println("변경 실패");
-                }
-
                 Picasso.with(getActivity()).load(new File(imagePath)).into(upload_img);
                 upload_img.setImageURI(selectedImageUri);
                 cursor.close();
 
-
-
                 send_img_btn.setEnabled(true);
-
-
 
             }
 

@@ -29,13 +29,18 @@ public class Login_activity extends AppCompatActivity {
     EditText login_id, login_pw;
     Button btn1;
 
-    ArrayList<String> data = new ArrayList<String>();
+    private ArrayList<String> data = new ArrayList<String>();
 
     String user_id, user_pw;
 
     PHPRequset requset;
 
     String php_result;
+
+
+    public ArrayList get_user_data(){
+        return data;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

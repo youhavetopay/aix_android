@@ -64,11 +64,15 @@ public class ImageUpload extends AsyncTask<String, Integer, Boolean> {
                         .addFormDataPart("result","photo_image").build();
 
                 Request request = new Request.Builder()
+                        .addHeader("Connection","close")
                         .url(imageUploadUrI)
                         .post(requestBody)
                         .build();
 
-                OkHttpClient client = new OkHttpClient();
+                OkHttpClient client = new OkHttpClient.Builder()
+                        .retryOnConnectionFailure(true)
+                        .build();
+
                 Response response = client.newCall(request).execute();
                 String res = response.body().string();
                 return new JSONObject(res);
